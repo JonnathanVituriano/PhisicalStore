@@ -15,4 +15,26 @@ const lojaSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Loja', lojaSchema);
+//insertion test
+const Loja  = mongoose.model('Loja', lojaSchema);
+
+const novaLoja = new Loja({
+    nome: "Loja Exemplo",
+    endereco: {
+        cep: "12345678",
+        rua: "Rua Exemplo",
+        numero: "123",
+        cidade: "Cidade Exemplo",
+        estado: "EX"
+    },
+    coordenadas: {
+        lat: -23.5505,
+        lng: -46.6333
+    }
+});
+
+novaLoja.save()
+    .then(() => console.log("Loja salva com sucesso!"))
+    .catch((err) => console.log("Erro ao salvar loja:", err));
+
+module.exports = Loja

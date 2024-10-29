@@ -2,19 +2,21 @@ const express = require('express');
 const conectarMongoDB = require('./config/database.js');
 const lojaRoutes = require('./routes/lojaRoutes.js');
 const winston = require('winston');
+const Loja = require('./models/lojaModels.js')
 
 const app = express();
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.json(),
     transports: [
-        new winston.transport.File({filename: 'logs.logs.json'})
+        new winston.transports.File({filename: 'logs.json'})
     ]
 });
 
 //Middleware de log
 app.use((req, res, next) => {
     logger.info({ method: req.method, url: req.url, timestamp: new Date().toISOString() });
+    next();
 });
 
 //conectar ao MongoDB
