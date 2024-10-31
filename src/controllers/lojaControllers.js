@@ -15,18 +15,32 @@ exports.buscaLojasProximas = async (req, res) => {
         const coordenadasUsuario = await buscarCoordenadas(cep);
         const lojas = await loja.find();
 
-        const lojasProximas = lojas.filter(loja => {
+        let lojasProximas = lojas.filter(loja => {
             const distancia = calcularDistancia(coordenadasUsuario.lat, coordenadasUsuario.lng, loja.coordenadas.lat, loja.coordenadas.lng);
             return distancia <= 100;
         });
+
+        lojasProximas = lojasProximas.filter((value, index, self) =>
+        index === self.findIndex((t) => (
+            t.endereco.cep === value.endereco.cep && t.nome === value.nome
+        ))
+    );
 
         if (lojasProximas.length === 0) {
             return res.status(404).json({ message: 'Nenhuma loja encontrada em um raio de 100km'});
         }
 
-        lojasProximas.sort((a, b) => calcularDistancia(coordenadasUsuario.lat, coordenadasUsuario.lng, a.coordenadas.lat, a.coordenadas.lng) - calcularDistancia(coordenadasUsuario.lat, coordenadasUsuario.lng, b.coordenadas.lat, b.coordenadas.lng));
-        
-        res.json(lojasProximas);
+        const resultado = lojasProximas.map((loja, index) => ({
+            [`cep_loja_${index + 1}`]: loja.endereco.cep,
+            [`nome_loja_${index + 1}`]: loja.nome,
+            [`rua_loja_${index + 1}`]: loja.endereco.rua,
+            [`numero_loja_${index + 1}`]: loja.endereco.numero,
+            [`cidade_loja_${index + 1}`]: loja.endereco.cidade,
+            [`estado_loja_${index + 1}`]: loja.endereco.estado
+        }));
+
+        res.json({ message: 'O CEP mencionado tem essas lojas em um raio de 100km:', lojas: resultado });
+
     } catch (error) {
         res.status(500).json({message: 'Erro no servidor' });
     }
